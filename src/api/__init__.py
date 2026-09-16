@@ -1,6 +1,12 @@
 """API layer.
 
-Intended responsibility: expose the agent over FastAPI. Endpoints to submit
-a support-ticket task, inspect the status/history of a run, inspect current
-agent state, and report service health. No route handlers exist yet.
+Exposes the agent over FastAPI: `POST /tasks` submits a support-ticket
+task and runs it through the existing graph, `GET /runs/{run_id}`
+retrieves a run's traced event history, and `GET /health` reports
+service liveness. See `src.api.app` for the FastAPI application and
+`src.api.models` for its request/response schemas.
 """
+
+from src.api.app import app
+
+__all__ = ["app"]
