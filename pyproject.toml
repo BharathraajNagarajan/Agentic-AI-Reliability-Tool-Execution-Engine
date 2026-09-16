@@ -8,6 +8,7 @@ version = "0.0.1"
 description = "Support-ticket ops agent: LLM proposes actions, a deterministic layer authorizes, validates, executes, and verifies them."
 requires-python = ">=3.10"
 dependencies = [
+    "anthropic",
     "fastapi",
     "langgraph",
     "pydantic",
