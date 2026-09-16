@@ -16,28 +16,26 @@ and the conditional-edge routers between them) are defined in
 `src.graph.nodes`; `build_agent_graph()` in `src.graph.build` wires them
 into a compiled, provably-terminating (strict DAG, no cycles) LangGraph
 state machine. `propose_node` takes an injectable proposal callable rather
-than a real LLM call — that integration is a future phase.
+than a real LLM call — that integration is a future phase. Every node
+factory also accepts an optional `src.observability.tracer.Tracer`;
+`build_agent_graph()` shares one `Tracer` across all of them, keyed by
+`AgentState.run_id`.
+
+This package's `__init__.py` intentionally does NOT re-export
+`src.graph.nodes`/`src.graph.build`, only `src.graph.state` (plus the
+policy/execution result types `AgentState` embeds): `src.graph.nodes` now
+imports `src.observability.tracer`, which itself imports `RunStatus` from
+`src.graph.state` — if this package eagerly imported `nodes`/`build` here,
+merely importing `src.graph.state` from anywhere would force-load
+`nodes`/`build` too (to finish initializing this package first), which in
+turn re-enters `src.observability.tracer` before it has finished
+initializing, causing a circular import. Import `src.graph.build` and
+`src.graph.nodes` directly by their submodule path instead — every
+existing caller already does.
 """
 
-from src.graph.build import build_agent_graph
-from src.graph.nodes import (
-    ProposeFn,
-    authorize_node,
-    make_execute_node,
-    make_propose_node,
-    mark_completed_node,
-    mark_denied_node,
-    mark_failed_node,
-    route_after_authorize,
-    route_after_execute,
-)
-from src.graph.state import (
-    AgentState,
-    ConversationMessage,
-    ExecutionResult,
-    ExecutionStatus,
-    RunStatus,
-)
+from src.execution.schemas import ExecutionResult, ExecutionStatus
+from src.graph.state import AgentState, ConversationMessage, RunStatus
 from src.policy.schemas import AuthorizationDecision, AuthorizationResult
 
 __all__ = [
@@ -47,15 +45,5 @@ __all__ = [
     "ConversationMessage",
     "ExecutionResult",
     "ExecutionStatus",
-    "ProposeFn",
     "RunStatus",
-    "authorize_node",
-    "build_agent_graph",
-    "make_execute_node",
-    "make_propose_node",
-    "mark_completed_node",
-    "mark_denied_node",
-    "mark_failed_node",
-    "route_after_authorize",
-    "route_after_execute",
 ]
